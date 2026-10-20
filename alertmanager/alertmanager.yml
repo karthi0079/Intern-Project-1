@@ -1,0 +1,14 @@
+global:
+  resolve_timeout: 1m
+
+route:
+  receiver: "recovery-webhook"
+  group_wait: 5s
+  group_interval: 30s
+  repeat_interval: 5m
+
+receivers:
+  - name: "recovery-webhook"
+    webhook_configs:
+      - url: "http://172.18.0.1:5001/alert"
+        send_resolved: false

@@ -1,0 +1,29 @@
+---
+- name: Recover NGINX container
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Check whether NGINX is running
+      ansible.builtin.command:
+        cmd: docker inspect -f '{{ "{{.State.Running}}" }}' nginx-app
+      register: nginx_status
+      changed_when: false
+
+    - name: Start NGINX if it is stopped
+      become: false
+      ansible.builtin.command:
+        cmd: docker start nginx-app
+      when: nginx_status.stdout != "true"
+      register: recovery_result
+
+    - name: Display NGINX status
+      ansible.builtin.debug:
+        msg: >-
+          NGINX is running.
+          {% if nginx_status.stdout != "true" %}
+          Recovery action: {{ recovery_result.stdout }}.
+          {% else %}
+          No recovery was needed.
+          {% endif %}
